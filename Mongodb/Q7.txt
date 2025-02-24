@@ -1,0 +1,116 @@
+
+
+students.insertMany([
+  {
+    "studentId": 1,
+    "name": "Alice",
+    "subject": "Math",
+    "marks": 85,
+    "class": "10A"
+  },
+  {
+    "studentId": 2,
+    "name": "Bob",
+    "subject": "Math",
+    "marks": 78,
+    "class": "10B"
+  },
+  {
+    "studentId": 3,
+    "name": "Charlie",
+    "subject": "Science",
+    "marks": 92,
+    "class": "10A"
+  },
+  {
+    "studentId": 4,
+    "name": "David",
+    "subject": "Math",
+    "marks": 60,
+    "class": "10B"
+  },
+  {
+    "studentId": 5,
+    "name": "Eve",
+    "subject": "Science",
+    "marks": 75,
+    "class": "10A"
+  },
+  {
+    "studentId": 6,
+    "name": "Frank",
+    "subject": "English",
+    "marks": 88,
+    "class": "10C"
+  },
+  {
+    "studentId": 7,
+    "name": "Grace",
+    "subject": "English",
+    "marks": 72,
+    "class": "10A"
+  },
+  {
+    "studentId": 8,
+    "name": "Hank",
+    "subject": "Math",
+    "marks": 95,
+    "class": "10C"
+  },
+  {
+    "studentId": 9,
+    "name": "Ivy",
+    "subject": "Science",
+    "marks": 68,
+    "class": "10B"
+  },
+  {
+    "studentId": 10,
+    "name": "Jack",
+    "subject": "English",
+    "marks": 80,
+    "class": "10C"
+  }
+]
+
+
+)
+
+db.marks.aggregate([
+  // Calculate the average marks per subject
+  { $group: { _id: "$subject", avgMarks: { $avg: "$marks" } } },
+
+  // Find the highest and lowest marks in each subject
+  { $group: { _id: "$subject", highestMarks: { $max: "$marks" }, lowestMarks: { $min: "$marks" } } },
+
+  // Count the number of students appearing for each subject
+  { $group: { _id: "$subject", studentCount: { $sum: 1 } } },
+
+  // Identify students scoring above 80 marks in any subject
+  { $match: { marks: { $gt: 80 } } },
+
+  // Determine the total marks obtained by all students
+  { $group: { _id: null, totalMarks: { $sum: "$marks" } } },
+
+  // Group students by class and find the average marks per class
+  { $group: { _id: "$class", avgMarks: { $avg: "$marks" } } },
+
+  // Identify the subject with the highest average marks
+  { $group: { _id: "$subject", avgMarks: { $avg: "$marks" } } },
+  { $sort: { avgMarks: -1 } },
+  { $limit: 1 },
+
+  // Find students scoring less than 70 marks and categorize them as "Needs Improvement"
+  { $match: { marks: { $lt: 70 } } },
+  { $project: { student: 1, subject: 1, marks: 1, status: "Needs Improvement" } },
+
+  // Find the top 2 highest-scoring students in each subject
+  { $sort: { subject: 1, marks: -1 } },
+  { $group: { _id: "$subject", topStudents: { $push: { student: "$student", marks: "$marks" } } } },
+  { $project: { _id: 1, topStudents: { $slice: ["$topStudents", 2] } } },
+
+  // Calculate the pass percentage (students scoring ≥ 40 marks) per subject
+  { $group: { _id: "$subject", totalStudents: { $sum: 1 }, passCount: { $sum: { $cond: [ { $gte: ["$marks", 40] }, 1, 0 ] } } } },
+  { $project: { _id: 1, passPercentage: { $multiply: [ { $divide: ["$passCount", "$totalStudents"] }, 100 ] } } }
+]);
+
