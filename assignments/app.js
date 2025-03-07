@@ -1,12 +1,15 @@
 
 import express from 'express';
 import router from './routers/notes.router.js';
+import notesrouter from './routers/notes.router.js';
 import {connect} from "mongoose"
 const app= express();
 
 app.use(express.json());
 
 app.use("/user",router)
+app.use("/notes",notesrouter)
+
 
 
 app.listen(3000, async()=>{

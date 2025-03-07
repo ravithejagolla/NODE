@@ -21,4 +21,12 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-export default isAuthenticated;
+const isAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).send({ error: 'Access denied' });
+    }
+};
+
+export { isAuthenticated, isAdmin };

@@ -3,20 +3,20 @@ import {createNote, getNotes, updateNote, deleteNote} from '../controllers/notes
 import isAuthenticated from '../middlewares/auth.middleware.js';
 
 
-const router = Router();
+const notesrouter = Router();
 
 
-router.post('/notes', isAuthenticated, createNote);
+notesrouter.post('/notes', isAuthenticated, createNote);
 
 
-router.get('/notes', isAuthenticated, getNotes);
+notesrouter.get('/notes', isAuthenticated, getNotes);
 
 
-router.put('/notes/:id', isAuthenticated, updateNote);
+notesrouter.put('/notes/:id', isAuthenticated, updateNote);
 
 
-router.delete('/notes/:id', isAuthenticated, deleteNote);
+notesrouter.delete('/notes/:id', isAuthenticated, deleteNote);
 
 
 
-export default router;
+export default notesrouter;
